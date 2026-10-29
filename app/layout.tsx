@@ -3,8 +3,8 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Kage — Anime Challenge Leaderboard',
-  description: 'Live standings for the Kage anime challenge league.',
+  title: "OTAKU'S / DEN — OTAKUS NITRR Leaderboard",
+  description: 'The official anime challenge leaderboard for the OTAKUS community at NITRR University.',
   generator: 'v0.app',
 }
 
