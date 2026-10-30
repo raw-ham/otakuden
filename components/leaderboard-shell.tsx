@@ -2,10 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { addDoc, collection, getDocs } from 'firebase/firestore'
 import { motion } from 'framer-motion'
 import { ArrowUpRight, ChevronDown, Crown, Gift, Search, Zap } from 'lucide-react'
-import { firestore } from '@/lib/firebase'
 
 const mockPlayers = [
   { name: 'Aiko Tanaka', mobile: '•••• 4821', score: 9840, title: 'Sakura Vanguard', color: '#f04f3e', initials: 'AT' },
@@ -17,28 +15,7 @@ const mockPlayers = [
   { name: 'Sora Fujimoto', mobile: '•••• 8426', score: 7280, title: 'Crimson Blade', color: '#f9a8d4', initials: 'SF' },
   { name: 'Jun Hayashi', mobile: '•••• 3137', score: 6910, title: 'Dawn Keeper', color: '#94a3b8', initials: 'JH' },
 ]
-type LeaderboardPlayer = typeof mockPlayers[number]
-
-async function readLeaderboard(): Promise<LeaderboardPlayer[]> {
-  const ref = collection(firestore, 'leaderboard')
-  const snapshot = await getDocs(ref)
-  const players = snapshot.docs.map((document, index) => {
-    const value = document.data()
-    return {
-      name: typeof value.name === 'string' && value.name.trim() ? value.name.trim() : `Otaku ${index + 1}`,
-      mobile: typeof value.mobile === 'string' ? value.mobile : '•••• ----',
-      score: typeof value.score === 'number' ? value.score : Number(value.score) || 0,
-      title: '',
-      color: mockPlayers[index % mockPlayers.length].color,
-      initials: (typeof value.name === 'string' ? value.name : `O${index + 1}`).slice(0, 2).toUpperCase(),
-    }
-  })
-  if (players.length) return players.sort((a, b) => b.score - a.score)
-  const seedPlayer = mockPlayers[0]
-  await addDoc(ref, { name: seedPlayer.name, mobile: seedPlayer.mobile, score: seedPlayer.score })
-  return [seedPlayer]
-}
-
+const fetcher = (url: string) => fetch(url).then((response) => response.json())
 const rankStyles = ['rank-gold', 'rank-silver', 'rank-bronze']
 
 export function LeaderboardShell() {
@@ -46,8 +23,8 @@ export function LeaderboardShell() {
   const [activeFilter, setActiveFilter] = useState('All players')
   const [showAll, setShowAll] = useState(false)
   const useMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true'
-  const { data: firebasePlayers } = useSWR(useMock ? null : 'firebase-leaderboard', readLeaderboard, { revalidateOnFocus: false })
-  const sourcePlayers = useMock ? mockPlayers : (firebasePlayers?.length ? firebasePlayers : [mockPlayers[0]])
+  const { data: firebasePlayers } = useSWR(useMock ? null : '/api/leaderboard', fetcher, { revalidateOnFocus: false })
+  const sourcePlayers = useMock ? mockPlayers : (firebasePlayers?.length ? firebasePlayers.map((player: { name: string; mobile: string; score: number }, index: number) => ({ ...mockPlayers[index % mockPlayers.length], ...player, initials: player.name.slice(0, 2).toUpperCase() })) : [mockPlayers[0]])
   const players = useMemo(() => sourcePlayers.filter((player) => player.name.toLowerCase().includes(query.toLowerCase()) && (activeFilter === 'All players' || (activeFilter === 'Top 3' ? player.score >= 8875 : player.score < 8875))), [activeFilter, query, sourcePlayers])
   const visiblePlayers = showAll ? players : players.slice(0, 6)
 
