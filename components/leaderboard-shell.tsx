@@ -20,7 +20,8 @@ const mockPlayers = [
 type LeaderboardPlayer = typeof mockPlayers[number]
 
 async function readLeaderboard(): Promise<LeaderboardPlayer[]> {
-  const snapshot = await getDocs(collection(firestore, 'leaderboard'))
+  const ref = collection(firestore, 'leaderboard')
+  const snapshot = await getDocs(ref)
   const players = snapshot.docs.map((document, index) => {
     const value = document.data()
     return {
