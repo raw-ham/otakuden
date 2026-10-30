@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { collection, getDocs } from 'firebase/firestore'
+import { addDoc, collection, getDocs } from 'firebase/firestore'
 import { motion } from 'framer-motion'
 import { ArrowUpRight, ChevronDown, Crown, Gift, Search, Zap } from 'lucide-react'
 import { firestore } from '@/lib/firebase'
@@ -32,7 +32,10 @@ async function readLeaderboard(): Promise<LeaderboardPlayer[]> {
       initials: (typeof value.name === 'string' ? value.name : `O${index + 1}`).slice(0, 2).toUpperCase(),
     }
   })
-  return players.length ? players.sort((a, b) => b.score - a.score) : [mockPlayers[0]]
+  if (players.length) return players.sort((a, b) => b.score - a.score)
+  const seedPlayer = mockPlayers[0]
+  await addDoc(ref, { name: seedPlayer.name, mobile: seedPlayer.mobile, score: seedPlayer.score })
+  return [seedPlayer]
 }
 
 const rankStyles = ['rank-gold', 'rank-silver', 'rank-bronze']
