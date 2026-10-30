@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import gsap from 'gsap'
 import { ArrowUpRight, ChevronDown, Crown, Gift, Search, Zap } from 'lucide-react'
 
 const mockPlayers = [
@@ -21,8 +20,6 @@ export function LeaderboardShell() {
   const [query, setQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState('All players')
   const [showAll, setShowAll] = useState(false)
-  const leaderboardRef = useRef<HTMLElement>(null)
-  useEffect(() => { if (leaderboardRef.current) gsap.fromTo(leaderboardRef.current.querySelectorAll('.top-player'), { y: 28, opacity: 0 }, { y: 0, opacity: 1, stagger: .12, duration: .75, ease: 'power3.out', delay: .2 }) }, [])
   const players = useMemo(() => mockPlayers.filter((player) => player.name.toLowerCase().includes(query.toLowerCase()) && (activeFilter === 'All players' || (activeFilter === 'Top 3' ? player.score >= 8875 : player.score < 8875))), [activeFilter, query])
   const visiblePlayers = showAll ? players : players.slice(0, 6)
 
@@ -30,7 +27,7 @@ export function LeaderboardShell() {
     <div className="noise-layer" />
     <div className="arcade-ticker"><span>オタク魂</span><b>INSERT COIN · PLAY TO RANK</b><span>勝者</span></div><header className="site-header page-width"><a className="brand-mark" href="#rankings"><img src="/shinobi-crest.png" alt="OTAKUS NITRR crest" /><span>OTAKU&apos;S <span className="brand-slash">/</span> DEN</span></a><nav className="desktop-nav"><a className="active" href="#rankings">Rankings</a><a href="#prizes">Prizes</a><a href="#about">Event intel</a></nav><button className="outline-button">Enter arena <ArrowUpRight className="size-3.5" /></button></header>
 
-    <section id="rankings" ref={leaderboardRef} className="ranking-portal page-width"><div className="portal-copy"><p className="eyebrow"><span className="live-dot" /> 公式 / OFFICIAL COMMUNITY</p><h1>OTAKUS<br /><em>/ NITRR</em></h1><p>The official leaderboard for the OTAKUS community of NITRR University. One arena, every legend.</p><div className="portal-meta"><span><b>1,248</b> 応援 / players</span><span><b>12:48:06</b> JST sync</span></div></div><div className="portal-katana"><img src="/katana-relic.png" alt="Katana resting on textured paper" /><span>剣 · OTAKUS</span></div><div className="portal-stamp">オタク<br /><span>影</span></div><div className="japanese-banner hero-banner">アニメ · 知識 · 栄光</div></section>
+    <section id="rankings" className="ranking-portal page-width"><div className="portal-copy"><p className="eyebrow"><span className="live-dot" /> 公式 / OFFICIAL COMMUNITY</p><h1>OTAKUS<br /><em>/ NITRR</em></h1><p>The official leaderboard for the OTAKUS community of NITRR University. One arena, every legend.</p><div className="portal-meta"><span><b>1,248</b> 応援 / players</span><span><b>12:48:06</b> JST sync</span></div></div><div className="portal-katana"><img src="/katana-relic.png" alt="Katana resting on textured paper" /><span>剣 · OTAKUS</span></div><div className="portal-stamp">オタク<br /><span>影</span></div><div className="japanese-banner hero-banner">アニメ · 知識 · 栄光</div></section>
 
     <section className="leaderboard-section page-width"><div className="toolbar"><div><h2>Top of the clan</h2><div className="japanese-banner">ランキング · LIVE / NITRR</div></div><div className="toolbar-controls"><label className="search-box"><Search className="size-4" /><input aria-label="Search players" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search player" /></label><div className="select-wrap"><select aria-label="Filter leaderboard" value={activeFilter} onChange={(e) => setActiveFilter(e.target.value)}><option>All players</option><option>Top 3</option><option>Rising stars</option></select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-3.5 -translate-y-1/2" /></div></div></div><div className="top-three-grid">{players.slice(0, 3).map((player, index) => <TopPlayer key={player.name} player={player} rank={index + 1} />)}</div><div className="table-card"><div className="table-head"><span>Rank</span><span>Player identity</span><span className="hidden sm:block">Archetype</span><span className="text-right">Score</span></div>{visiblePlayers.slice(3).map((player, index) => <PlayerRow key={player.name} player={player} rank={index + 4} />)}{visiblePlayers.length <= 3 && <div className="empty-state">No players found in this filter.</div>}</div>{players.length > 6 && <button onClick={() => setShowAll(!showAll)} className="view-all">{showAll ? 'Collapse rankings' : 'View all rankings'} <ArrowUpRight className="size-3.5" /></button>}</section>
 
